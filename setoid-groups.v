@@ -16,7 +16,6 @@ Class Group `(Setoid A rel) (dot : A -> A -> A) (e : A) (inv : A -> A) :=
 Require Import Bool Arith ZArith.
 Require Import Ring.
 
-
 (** The Z/nZ Setoid, that is the setoid of (mod n)-equivalence classes over Z.
 
   This is the way I define a finite setoid.
@@ -39,4 +38,34 @@ Instance eq_setoid (A : Type) : Setoid A eq.
 Proof.
   split. apply eq_equivalence.
 Qed.
+
+Definition setoid_homomorphism `(B  : Setoid A  rel )
+                               `(B' : Setoid A' rel') (f : A -> A') : Prop
+  := forall x y, (rel x y) <-> (rel' (f x) (f y)).
+
+Definition finite_setoid `(B : Setoid A rel) : Prop
+  := exists n f, setoid_homomorphism B (ZnZ n) f.
+
+Theorem bool_finite : finite_setoid (eq_setoid bool).
+Proof.
+  unfold finite_setoid. exists 2%Z.
+  remember (fun x : bool => if x then 1%Z else 0%Z) as f.
+  exists f. rewrite Heqf. clear Heqf. clear f.
+  split.
+  - intros H. rewrite H. exists 0%Z. omega.
+  - intros [a H]. destruct x; destruct y; simpl; auto; omega.
+Qed.
+
+(* TODO: Probably, I will need the excluded middle here. *)
+Theorem nat_infinite : ~ finite_setoid (eq_setoid nat).
+Proof.
+  intros H. destruct H as [n [f H]].
+  unfold setoid_homomorphism in H. Abort.
+
+
+
+
+
+
+
 
